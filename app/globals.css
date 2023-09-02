@@ -37,6 +37,15 @@
     @apply relative mt-2 w-0.5 grow rounded-full bg-neutral-800;
   }
 
+  .tweet-card_image {
+    @apply flex h-24 w-24 items-center justify-center rounded-lg !important;
+  }
+
+  /* Form input  */
+  .form-input_image {
+    @apply cursor-pointer border-none bg-transparent outline-none file:text-blue !important;
+  }
+
   /* User card */
   .user-card {
     @apply flex flex-col justify-between gap-4 max-xs:rounded-xl max-xs:bg-dark-3 max-xs:p-4 xs:flex-row xs:items-center;
@@ -141,10 +150,6 @@
 /* Account Profile  */
 .account-form_image-label {
   @apply flex h-24 w-24 items-center justify-center rounded-full bg-dark-4 !important;
-}
-
-.account-form_image-input {
-  @apply cursor-pointer border-none bg-transparent outline-none file:text-blue !important;
 }
 
 .account-form_input {

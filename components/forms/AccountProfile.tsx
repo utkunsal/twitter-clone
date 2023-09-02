@@ -7,6 +7,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
@@ -67,6 +68,9 @@ export default function AccountProfile({ user }: Props) {
   }
 
   const onSubmit = async (values: z.infer<typeof UserValidation>) => {
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    loadingIndicator?.classList.remove('hidden');
+    
     const image = values.profilePhoto
 
     const isNewImage = isBase64Image(image)
@@ -122,10 +126,11 @@ export default function AccountProfile({ user }: Props) {
                 type="file"
                 accept="image/*"
                 placeholder="Upload a photo"
-                className="account-form_image-input"
+                className="form-input_image"
                 onChange={e => handleImage(e, field.onChange)}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -144,6 +149,7 @@ export default function AccountProfile({ user }: Props) {
                 {...field}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -162,6 +168,7 @@ export default function AccountProfile({ user }: Props) {
                 {...field}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -180,6 +187,7 @@ export default function AccountProfile({ user }: Props) {
                 {...field}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -188,6 +196,7 @@ export default function AccountProfile({ user }: Props) {
         className="bg-primary-500"
       >
         Continue
+        <span id="loadingIndicator" className="hidden animate-spin rounded-full border-opacity-70 ml-3.5 h-5 w-5 border-t-2 border-r-2 border-gray-300"></span>
       </Button>
     </form>
   </Form>
