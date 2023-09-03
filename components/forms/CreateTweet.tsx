@@ -71,7 +71,7 @@ export default function CreateTweet({ userId }: {userId: string}){
     await createTweet({
       text: values.tweet,
       image: imageUrl,
-      author: values.userId,
+      author: JSON.parse(values.userId),
       communityId: null, // TODO
       path: pathname,
     })

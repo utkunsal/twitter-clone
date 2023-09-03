@@ -41,6 +41,10 @@
     @apply flex h-24 w-24 items-center justify-center rounded-lg !important;
   }
 
+  .tweet-reply_image {
+    @apply flex h-16 w-16 items-center justify-center rounded-lg !important;
+  }
+
   /* Form input  */
   .form-input_image {
     @apply cursor-pointer border-none bg-transparent outline-none file:text-blue !important;
@@ -159,8 +163,4 @@
 /* Comment Form */
 .comment-form {
   @apply mt-10 flex items-center gap-4 border-y border-y-dark-4 py-5 max-xs:flex-col !important;
-}
-
-.comment-form_btn {
-  @apply rounded-3xl bg-primary-500 px-8 py-2 !text-small-regular text-light-1 max-xs:w-full !important;
 }

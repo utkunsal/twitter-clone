@@ -17,7 +17,7 @@ export default async function Page() {
     <>
       <h1 className="head-text">Create Tweet</h1>
       <CreateTweet 
-        userId={userInfo._id}
+        userId={JSON.stringify(userInfo._id)}
       />
     </>
   )
