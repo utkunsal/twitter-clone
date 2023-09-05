@@ -30,3 +30,18 @@ export const sidebarLinks = [
     label: "Profile",
   },
 ];
+
+export const profileTabs = [
+  { 
+    value: "tweets", 
+    label: "Tweets", 
+  },
+  { 
+    value: "replies", 
+    label: "Replies", 
+  },
+  { 
+    value: "likes", 
+    label: "Likes", 
+  },
+];

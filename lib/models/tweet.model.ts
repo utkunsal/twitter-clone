@@ -22,7 +22,17 @@ const tweetSchema = new mongoose.Schema({
     default: Date.now
   },
 
-  parentId: {type: String},
+  likes: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+
+  likeCount: Number,
+
+  parent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Tweet"
+  },
 
   children: [
     {

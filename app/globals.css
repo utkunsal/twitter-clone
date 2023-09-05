@@ -34,7 +34,7 @@
 
   /* Tweet card  */
   .tweet-card_bar {
-    @apply relative mt-2 w-0.5 grow rounded-full bg-neutral-800;
+    @apply relative mt-0 -mb-[0.75rem] w-0.5 grow rounded-full bg-neutral-800;
   }
 
   .tweet-card_image {
@@ -68,7 +68,7 @@
   }
 
   .searchbar_input {
-    @apply border-none bg-dark-3 text-base-regular text-light-4 outline-none !important;
+    @apply border-none bg-dark-3 text-base-regular text-gray-400 outline-none !important;
   }
 
   .topbar {

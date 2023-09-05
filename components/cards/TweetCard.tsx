@@ -1,10 +1,11 @@
 import Image from "next/image"
 import Link from "next/link"
+import TweetButtons from "@/components/shared/TweetButtons"
+import { isLiked } from "@/lib/actions/tweet.actions"
 
 interface Props {
   id: string,
   currentUserId: string,
-  parentId: string,
   content: string,
   image: string | null,
   author: {
@@ -26,12 +27,13 @@ interface Props {
   }[],
   isReply?: boolean,
   hideTotalReplyCount?: boolean,
+  hideLine?: boolean,
+  className?: string,
 }
 
-export function TweetCard ({
+export async function TweetCard ({
   id,
   currentUserId,
-  parentId,
   content,
   image,
   author,
@@ -40,9 +42,14 @@ export function TweetCard ({
   replies,
   isReply,
   hideTotalReplyCount,
+  hideLine,
+  className,
 }: Props) {
+
+  const isLikedByCurrentUser = await isLiked({ tweetId: id, currentUserId })
+
   return(
-    <article className={`flex flex-col rounded w-full ${isReply ? "py-2 px-5" : "bg-dark-2 p-5"}`}>
+    <article className={`${className} flex flex-col rounded w-full ${isReply ? "py-2 pb px-5" : "bg-dark-2 p-5"}`}>
       <div className="flex justify-between items-start">
         <div className="flex flex-1 flex-row w-full gap-4">
           
@@ -55,7 +62,7 @@ export function TweetCard ({
                 className="cursor-pointer rounded-full"
               />
             </Link>
-            <div className="tweet-card_bar" />
+            {!hideLine && <div className="tweet-card_bar" />}
           </div>
 
           <div className="flex flex-col w-full">
@@ -65,7 +72,7 @@ export function TweetCard ({
               </h4>
             </Link>
 
-            <Link href={`/tweet/${id}`} className="cursor-default">
+            <Link href={`/tweet/${id}`} className="cursor-pointer">
               <p className="mt-2 text-small-regular text-light-2">
                 {content}
               </p>
@@ -80,8 +87,14 @@ export function TweetCard ({
               />} 
             </Link>
 
-            <div className="flex flex-col mt-5 gap-3">
-              <div className="flex gap-10">
+            <>
+              <TweetButtons 
+                tweetId={JSON.stringify(id)} 
+                currentUserId={currentUserId} 
+                liked={isLikedByCurrentUser ?? false}
+                replyCount={!hideTotalReplyCount && !isReply && replies.length !== 0 ? null : replies.length}
+              />
+             {/*  <div className="flex gap-10">
                 <Link href={`/tweet/${id}`}>
                   <Image
                     src="/assets/reply.svg"
@@ -105,16 +118,16 @@ export function TweetCard ({
                   height={20}
                   className="opacity-70 cursor-pointer object-contain" 
                 />
-              </div>
+              </div> */}
 
-              {!hideTotalReplyCount && isReply && replies.length > 0 &&
+             {/*  {!hideTotalReplyCount && isReply && replies.length > 0 &&
                 <Link href={`/tweet/${id}`}>
                   <p className="mt-1 text-subtle-medium text-light-2 opacity-50 pb-2">
                     {replies.length} repl{replies.length === 1 ? "y" : "ies"}
                   </p>
                 </Link>
-              }
-            </div>
+              } */}
+            </>
           </div>
         </div>
 
