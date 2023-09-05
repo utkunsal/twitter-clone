@@ -22,10 +22,12 @@ const tweetSchema = new mongoose.Schema({
     default: Date.now
   },
 
-  likes: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
+  likes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }
+  ],
 
   likeCount: Number,
 

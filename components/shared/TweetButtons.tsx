@@ -3,6 +3,7 @@
 import { likeTweet, removeLikeTweet } from "@/lib/actions/tweet.actions";
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 interface Props { 
@@ -19,6 +20,7 @@ export default function TweetButtons({
   replyCount 
 }: Props){
   const [like, setLike] = useState(liked)
+  const pathname = usePathname()
 
   const handleRepostClick = () => {
     
@@ -26,9 +28,9 @@ export default function TweetButtons({
 
   const handleLikeClick = async () => {
     like ?
-    await removeLikeTweet({ tweetId: JSON.parse(tweetId), currentUserId })
+    await removeLikeTweet({ tweetId: JSON.parse(tweetId), currentUserId, path: pathname })
     :
-    await likeTweet({ tweetId: JSON.parse(tweetId), currentUserId })
+    await likeTweet({ tweetId: JSON.parse(tweetId), currentUserId, path: pathname })
     setLike(!like)
   };
 

@@ -258,7 +258,7 @@ export async function getAllParentTweets(tweetId: string) {
 }
 
 
-export const likeTweet = async ({ tweetId, currentUserId }: { tweetId: string, currentUserId: string }) => {
+export const likeTweet = async ({ tweetId, currentUserId, path }: { tweetId: string, currentUserId: string, path: string }) => {
   try {
     await connectToDb()
     if(!currentUserId) return
@@ -273,13 +273,16 @@ export const likeTweet = async ({ tweetId, currentUserId }: { tweetId: string, c
       "$inc": { "likeCount": 1 },
       "$push": { "likes": _id }
     })
+    
+    revalidatePath(path)
+
   } catch (err: any) {
     throw new Error(`Failed to like tweet: ${err.message}`);
   }
 }
 
 
-export const removeLikeTweet = async ({ tweetId, currentUserId }: { tweetId: string, currentUserId: string }) => {
+export const removeLikeTweet = async ({ tweetId, currentUserId, path }: { tweetId: string, currentUserId: string, path: string }) => {
   try {
     await connectToDb()
     if(!currentUserId) return
@@ -294,6 +297,9 @@ export const removeLikeTweet = async ({ tweetId, currentUserId }: { tweetId: str
       "$inc": { "likeCount": -1 },
       "$pull": { "likes": _id }
     })
+    
+    revalidatePath(path)
+
   } catch (err: any) {
     throw new Error(`Failed to remove like tweet: ${err.message}`);
   }
@@ -312,9 +318,7 @@ export const isLiked = async ({ tweetId, currentUserId }: { tweetId: string, cur
 
     const result = await Tweet.findOne({ 
       "_id": tweetId,
-      "likes": { 
-        $in: [_id] 
-      }
+      "likes": _id,
     })
 
     return result?.likes ? true : false
