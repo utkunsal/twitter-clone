@@ -4,10 +4,9 @@ import { TweetCard } from "../cards/TweetCard";
 interface Props {
   currentUserId: string,
   accountId: string,
-  accountType: string,
 }
 
-export default async function TweetsTab({ currentUserId, accountId, accountType }: Props){
+export default async function TweetsTab({ currentUserId, accountId }: Props){
   const response = await getUserTweets(accountId);
 
   return(
@@ -20,10 +19,11 @@ export default async function TweetsTab({ currentUserId, accountId, accountType 
           content={tweet.text}
           image={tweet.image}
           author={{ id: response.id, image: response.image, name: response.name, username: response.username }}
-          comunity={tweet.community}
           createdAt={tweet.createdAt}
           replies={tweet.children} 
           hideLine={!tweet.children.length}
+          repost={tweet.repost}
+          likeCount={tweet.likeCount ?? 0}
         />
       ))}
     </section>

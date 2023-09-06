@@ -39,7 +39,6 @@ export default async function Page({ searchParams }: { searchParams: { [key: str
                 name={person.name}
                 username={person.username}
                 imageUrl={person.image}
-                personType='User'
               />
             ))}
           </>

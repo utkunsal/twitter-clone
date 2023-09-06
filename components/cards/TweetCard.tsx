@@ -2,6 +2,8 @@ import Image from "next/image"
 import Link from "next/link"
 import TweetButtons from "@/components/shared/TweetButtons"
 import { isLiked } from "@/lib/actions/tweet.actions"
+import ClientButton from "@/components/shared/ClientButton"
+import { formatDateString } from "@/lib/utils"
 
 interface Props {
   id: string,
@@ -14,20 +16,30 @@ interface Props {
     username: string
     image: string,
   },
-  comunity: {
-    id: string,
-    name: string,
-    image: string,
-  } | null,
   createdAt: string,
   replies: {
     author: {
       image: string,
     }
   }[],
+  likeCount?: number,
+  repost?: {
+    id: string,
+    text: string,
+    image: string | null,
+    author: {
+      id: string,
+      name: string,
+      username: string
+      image: string,
+    },
+    createdAt: string,
+  }
   isReply?: boolean,
   hideTotalReplyCount?: boolean,
   hideLine?: boolean,
+  hideButtons?: boolean,
+  isRepost?: boolean,
   className?: string,
 }
 
@@ -37,19 +49,22 @@ export async function TweetCard ({
   content,
   image,
   author,
-  comunity,
   createdAt,
+  likeCount,
   replies,
+  repost,
   isReply,
   hideTotalReplyCount,
   hideLine,
+  hideButtons,
+  isRepost,
   className,
 }: Props) {
 
   const isLikedByCurrentUser = await isLiked({ tweetId: id, currentUserId })
 
   return(
-    <article className={`${className} flex flex-col rounded w-full ${isReply ? "py-2 pb px-5" : "bg-dark-2 p-5"}`}>
+    <article className={`${className} flex flex-col rounded w-full ${isRepost && "py-2 px-2"} ${isReply ? "py-2 pb px-5" : "bg-dark-2 p-5"}`}>
       <div className="flex justify-between items-start">
         <div className="flex flex-1 flex-row w-full gap-4">
           
@@ -66,14 +81,16 @@ export async function TweetCard ({
           </div>
 
           <div className="flex flex-col w-full">
-            <Link href={`/profile/${author.id}`} className="w-fit">
-              <h4 className="flex cursor-pointer text-base-semibold text-light-1 gap-1.5">
-                {author.name}<span className="text-small-medium opacity-50">@{author.username}</span>
-              </h4>
-            </Link>
-
+            <div className="flex flex-row w-full justify-between">
+              <Link href={`/profile/${author.id}`} className="w-fit">
+                <h4 className="flex cursor-pointer text-base-semibold text-light-1 gap-1.5">
+                  {author.name}<span className="text-small-medium opacity-50">@{author.username}</span>
+                </h4>
+              </Link>
+              {!isRepost && <span className="text-small-regular text-light-1 opacity-50">{formatDateString(createdAt)}</span>}
+            </div>
             <Link href={`/tweet/${id}`} className="cursor-pointer">
-              <p className="mt-2 text-small-regular text-light-2">
+              <p className={`${isRepost ? "mt-1" : "mt-2"} text-small-regular text-light-2`}>
                 {content}
               </p>
 
@@ -87,47 +104,42 @@ export async function TweetCard ({
               />} 
             </Link>
 
-            <>
-              <TweetButtons 
-                tweetId={JSON.stringify(id)} 
-                currentUserId={currentUserId} 
-                liked={isLikedByCurrentUser ?? false}
-                replyCount={!hideTotalReplyCount && !isReply && replies.length !== 0 ? null : replies.length}
+            {repost && 
+              <TweetCard 
+                key={repost.id}
+                id={repost.id}
+                currentUserId={currentUserId}
+                content={repost.text}
+                image={repost.image}
+                author={repost.author}
+                createdAt={repost.createdAt}
+                replies={[]} 
+                hideLine
+                hideButtons
+                hideTotalReplyCount
+                isRepost
+                className="border border-neutral-600 rounded-lg mt-1.5"
               />
-             {/*  <div className="flex gap-10">
-                <Link href={`/tweet/${id}`}>
-                  <Image
-                    src="/assets/reply.svg"
-                    alt="reply"
-                    width={20}
-                    height={20}
-                    className="opacity-70 cursor-pointer object-contain" 
-                  />
-                </Link>
-                <Image
-                  src="/assets/repost.svg"
-                  alt="repost"
-                  width={20}
-                  height={20}
-                  className="opacity-70 cursor-pointer object-contain" 
-                />
-                  <Image
-                  src="/assets/heart.svg"
-                  alt="heart"
-                  width={20}
-                  height={20}
-                  className="opacity-70 cursor-pointer object-contain" 
-                />
-              </div> */}
+            }
 
-             {/*  {!hideTotalReplyCount && isReply && replies.length > 0 &&
-                <Link href={`/tweet/${id}`}>
-                  <p className="mt-1 text-subtle-medium text-light-2 opacity-50 pb-2">
-                    {replies.length} repl{replies.length === 1 ? "y" : "ies"}
-                  </p>
-                </Link>
-              } */}
-            </>
+            {!hideButtons && 
+              <div className="flex flex-row items-center justify-between">
+                <TweetButtons 
+                  tweetId={JSON.stringify(id)} 
+                  currentUserId={currentUserId} 
+                  liked={isLikedByCurrentUser ?? false}
+                  replyCount={!hideTotalReplyCount && !isReply && replies.length !== 0 ? null : replies.length}
+                  likeCount={likeCount}
+                />
+             {/*  {currentUserId === author.id && 
+                  <ClientButton
+                    type="delete"
+                    currentUserId={currentUserId}
+                    tweetId={JSON.stringify(id)}
+                  />
+                } */}
+              </div>
+            }
           </div>
         </div>
 

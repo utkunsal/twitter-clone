@@ -22,11 +22,12 @@ export default async function TweetsTab({ currentUserId, accountId }: Props){
               content={tweet.parent.text}
               image={tweet.parent.image}
               author={tweet.parent.author}
-              comunity={tweet.parent.community}
               createdAt={tweet.parent.createdAt}
               replies={[]} 
               isReply
               className="-mb-1"
+              repost={tweet.parent.repost}
+              likeCount={tweet.parent.likeCount ?? 0}
             />
           {/*  <p className="text-small-regular p-2 px-4 mt-0.5 -mb-1 text-gray-400">
               Replying to 
@@ -43,11 +44,11 @@ export default async function TweetsTab({ currentUserId, accountId }: Props){
             content={tweet.text}
             image={tweet.image}
             author={{ id: response.id, image: response.image, name: response.name, username: response.username }}
-            comunity={tweet.community}
             createdAt={tweet.createdAt}
             replies={tweet.children} 
             isReply
             hideLine
+            likeCount={tweet.likeCount ?? 0}
           />
           <div className='mt-4 mb-6 h-0.5 w-full bg-light-2 bg-opacity-20' />
         </div>

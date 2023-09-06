@@ -40,10 +40,10 @@ export default async function Page({ params }: { params: { id: string } }) {
             content={data.parent.text}
             image={data.parent.image}
             author={data.parent.author}
-            comunity={data.parent.community}
             createdAt={data.parent.createdAt}
             replies={[]} 
             className="-mt-5 -mb-7"
+            likeCount={data.parent.likeCount ?? 0}
           />
         </div>
       );
@@ -63,10 +63,11 @@ export default async function Page({ params }: { params: { id: string } }) {
             content={parent.text}
             image={parent.image}
             author={parent.author}
-            comunity={parent.community}
             createdAt={parent.createdAt}
             replies={[]} 
+            repost={parent.repost}
             className="-mt-5"
+            likeCount={parent.likeCount ?? 0}
             />
           </>
         }
@@ -77,14 +78,15 @@ export default async function Page({ params }: { params: { id: string } }) {
           content={tweet.text}
           image={tweet.image}
           author={tweet.author}
-          comunity={tweet.community}
           createdAt={tweet.createdAt}
           replies={tweet.children} 
           className="-mt-7"
           hideLine={tweet.children.length === 0}
+          repost={tweet.repost}
+          likeCount={tweet.likeCount ?? 0}
         />
       </>
-      <div className="my-7">
+      <div className="mb-4 -mt-7">
         <Reply 
           tweetId={tweet.id}
           currentUserId={JSON.stringify(userInfo._id)}
@@ -107,11 +109,11 @@ export default async function Page({ params }: { params: { id: string } }) {
               content={childTweet.text}
               image={childTweet.image}
               author={childTweet.author}
-              comunity={childTweet.community}
               createdAt={childTweet.createdAt}
               replies={childTweet.children} 
               isReply
               hideLine={!childTweet.children.length}
+              likeCount={childTweet.likeCount ?? 0}
             />
             {childTweet.children.slice(0, 1).map((childOfChildTweet: any, index: number) => (
                 <TweetCard 
@@ -121,13 +123,13 @@ export default async function Page({ params }: { params: { id: string } }) {
                   content={childOfChildTweet.text}
                   image={childOfChildTweet.image}
                   author={childOfChildTweet.author}
-                  comunity={childOfChildTweet.community}
                   createdAt={childOfChildTweet.createdAt}
                   replies={childOfChildTweet.children} 
                   isReply
                   hideTotalReplyCount
                   hideLine={childOfChildTweet.children.length === 0}
                   className="-mt-1"
+                  likeCount={childOfChildTweet.likeCount ?? 0}
                 />
               ))}
               {childTweet.children.length > 1 && (

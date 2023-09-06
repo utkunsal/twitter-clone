@@ -9,7 +9,7 @@ interface Params {
   text: string,
   author: string,
   image: string | null,
-  communityId?: string | null,
+  repostId?: string | null,
   path: string,
   tweetId?: string,
 }
@@ -22,17 +22,21 @@ export const createTweet = async ({
   text,
   image,
   author,
-  communityId,
+  repostId,
   path,
 }: Params): Promise<void> => {
   try {
     await connectToDb()
     
-    const createdTweet = await Tweet.create({
+    const createdTweet = await Tweet.create(!repostId ? {
       text,
       image,
       author,
-      community: null, // TODO
+    } : {
+      text,
+      image,
+      author,
+      repost: repostId,
     })
 
     await User.findByIdAndUpdate(author, {
@@ -92,10 +96,9 @@ export const addReplyToTweet = async ({
  * Gets recent tweets from all users
  * @param pageNumber:     number of the requested page
  * @param pageSize:       tweet count in a single page
- * @param currentUserId:  auth user id of the logged in user
- * @returns           tweets[] and hasNext:boolean(true if next page exists)
+ * @returns               tweets[] and hasNext:boolean(true if next page exists)
  */
-export const getTweets = async ( pageNumber=1, pageSize=15, currentUserId: string ) => {
+export const getTweets = async ( pageNumber=1, pageSize=15 ) => {
   try {
     await connectToDb()
     //const { _id } = await User.findOne({ id: currentUserId }, "_id")
@@ -103,7 +106,7 @@ export const getTweets = async ( pageNumber=1, pageSize=15, currentUserId: strin
     const offset = (pageNumber - 1) * pageSize
 
     const query = Tweet
-                    .find({ parent: { $in: [null, undefined] } }, "_id text image author parent children createdAt likeCount")
+                    .find({ parent: { $in: [null, undefined] } }, "_id text image author parent children createdAt likeCount repost")
                     .sort({ createdAt: "desc" })
                     .skip(offset)
                     .limit(pageSize)
@@ -134,6 +137,16 @@ export const getTweets = async ( pageNumber=1, pageSize=15, currentUserId: strin
                         }
                       ],
                     })
+                    .populate({ 
+                      path: "repost", 
+                      model: Tweet,
+                      select: "_id text image author parent createdAt likeCount",
+                      populate:  {
+                        path: "author",
+                        model: User,
+                        select: "id name username image",
+                      },
+                    })
   
   const tweets = await query.exec();
 
@@ -158,7 +171,7 @@ export const getTweetById = async ( id: string ) => {
     await connectToDb()
     
     const tweet = await Tweet
-                            .findById(id, "_id text image author parent children createdAt likeCount")
+                            .findById(id, "_id text image author parent repost children createdAt likeCount")
                             .populate({
                               path: "author",
                               model: User,
@@ -167,13 +180,23 @@ export const getTweetById = async ( id: string ) => {
                             .populate({
                               path: "parent",
                               model: Tweet,
-                              select: "_id text image author parent children createdAt likeCount",
+                              select: "_id text image author parent repost children createdAt likeCount",
                               populate: [
                                 {
                                   path: "author",
                                   model: User,
                                   select: "id name username image"
                                 },
+                                {
+                                  path: "repost",
+                                  model: Tweet,
+                                  select: "_id text image author parent createdAt likeCount",
+                                  populate: {
+                                    path: "author",
+                                    model: User,
+                                    select: "name username image id", 
+                                  },
+                                }
                               ]
                             })
                             .populate({
@@ -197,6 +220,16 @@ export const getTweetById = async ( id: string ) => {
                                   }
                                 }
                               ]
+                            })
+                            .populate({ 
+                              path: "repost", 
+                              model: Tweet,
+                              select: "_id text image author parent createdAt likeCount",
+                              populate:  {
+                                path: "author",
+                                model: User,
+                                select: "id name username image",
+                              },
                             })
                             .exec();
 
@@ -224,7 +257,7 @@ export async function getAllParentTweets(tweetId: string) {
     })
     .populate({
       path: "parent",
-      select: "_id text image author parent createdAt likeCount",
+      select: "_id text image author parent repost createdAt likeCount",
       populate: [
         {
           path: "author",
@@ -234,13 +267,35 @@ export async function getAllParentTweets(tweetId: string) {
         {
           path: "parent",
           model: Tweet,
+          select: "_id text image author parent repost createdAt likeCount",
+          populate: [
+            {
+            path: "author",
+            model: User,
+            select: "id username image"
+            },
+            {
+              path: "repost",
+              model: Tweet,
+              select: "_id text image author parent createdAt likeCount",
+              populate: {
+                path: "author",
+                model: User,
+                select: "name username image id", 
+              },
+            }
+          ]
+        },
+        {
+          path: "repost",
+          model: Tweet,
           select: "_id text image author parent createdAt likeCount",
           populate: {
             path: "author",
             model: User,
-            select: "id username image"
+            select: "name username image id", 
           },
-        },
+        }
       ]
     })
     .exec()

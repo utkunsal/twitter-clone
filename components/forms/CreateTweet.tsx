@@ -22,7 +22,7 @@ import { createTweet } from "@/lib/actions/tweet.actions"
 import Image from "next/image"
 
 
-export default function CreateTweet({ userId }: {userId: string}){
+export default function CreateTweet({ userId, tweetToQuote }: {userId: string, tweetToQuote?: string}){
   const [file, setFile] = useState<File | null>()
   const { startUpload } = useUploadThing("media")
   const router = useRouter()
@@ -60,29 +60,40 @@ export default function CreateTweet({ userId }: {userId: string}){
     const loadingIndicator = document.getElementById('loadingIndicator');
     loadingIndicator?.classList.remove('hidden');
 
-    let imageUrl = null
-    if (file){
-      const response = await startUpload([file])
-      if (response && response[0].url){
-        imageUrl = response[0].url
-      }
-    }
+    if(!tweetToQuote){
 
-    await createTweet({
-      text: values.tweet,
-      image: imageUrl,
-      author: JSON.parse(values.userId),
-      communityId: null, // TODO
-      path: pathname,
-    })
+      let imageUrl = null
+      if (file){
+        const response = await startUpload([file])
+        if (response && response[0].url){
+          imageUrl = response[0].url
+        }
+      }
+
+      await createTweet({
+        text: values.tweet,
+        image: imageUrl,
+        author: JSON.parse(values.userId),
+        path: pathname,
+      })
+    } else {
+
+      await createTweet({
+        text: values.tweet,
+        image: null,
+        author: JSON.parse(values.userId),
+        path: pathname,
+        repostId: JSON.parse(tweetToQuote)
+      })
+    }
 
     router.push("/")
   }
 
   return(
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="gap-10 mt-10 flex flex-col justify-start">
-        <FormField
+      <form onSubmit={form.handleSubmit(onSubmit)} className={`gap-10 mt-10 flex flex-col justify-start`}>
+        {!tweetToQuote && <FormField
           control={form.control}
           name="image"
           render={({ field }) => (
@@ -137,18 +148,19 @@ export default function CreateTweet({ userId }: {userId: string}){
               <FormMessage />
             </FormItem>
           )}
-        />
+        />}
         <FormField
           control={form.control}
           name="tweet"
           render={({ field }) => (
             <FormItem className="flex flex-col w-full gap-3">
-              <FormLabel className="text-base-semibold text-light-2">
+              {/* <FormLabel className="text-base-semibold text-light-2">
               Content
-              </FormLabel>
+              </FormLabel> */}
               <FormControl className="no-focus border bg-dark-3 text-light-1 border-dark-4">
               <Textarea 
-                  rows={10}
+                  rows={tweetToQuote ? 2 : 8}
+                  placeholder="Say something..."
                   className="account-form_input no-focus"
                   {...field}
                 />
@@ -159,7 +171,7 @@ export default function CreateTweet({ userId }: {userId: string}){
         />
         <Button 
           type="submit"
-          className="bg-primary-500"
+          className={`bg-primary-500 ${tweetToQuote && "-order-1 h-8 -mb-4 self-end"}`}
         >
           Post 
           <span id="loadingIndicator" className="hidden animate-spin rounded-full border-opacity-70 ml-3.5 h-5 w-5 border-t-2 border-r-2 border-gray-300"></span>

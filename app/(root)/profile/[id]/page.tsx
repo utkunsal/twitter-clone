@@ -22,17 +22,20 @@ export default async function Page({ params }: { params: { id: string } }) {
   const userInfo = await getUser(params.id);
 
   if (!userInfo?.onboarded) 
-    redirect("/onboarding")
+    redirect("/")
 
   return(
     <section>
       <ProfileHeader 
-        accountId={userInfo._id}
+        accountId={userInfo.id}
         authUserId={user.id}
+        targetObjectId={userInfo._id}
         name={userInfo.name}
         username={userInfo.username}
         imageUrl={userInfo.image}
         bio={userInfo.bio}
+        followersCount={userInfo.followers.length}
+        followingCount={userInfo.following.length}
       />
 
       <div className="mt-4">
@@ -59,7 +62,6 @@ export default async function Page({ params }: { params: { id: string } }) {
               <DynamicComponent
                 currentUserId={user.id}
                 accountId={userInfo.id}
-                accountType='User'
               />
             </TabsContent>)
           })}

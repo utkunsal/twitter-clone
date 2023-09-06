@@ -31,10 +31,12 @@ export default async function LikesTab({ currentUserId, accountId }: Props){
             content={tweet.text}
             image={tweet.image}
             author={tweet.author}
-            comunity={tweet.community}
             createdAt={tweet.createdAt}
-            replies={[]} 
+            replies={tweet.children} 
+            hideTotalReplyCount
             hideLine
+            repost={tweet.repost}
+            likeCount={tweet.likeCount ?? 0}
           />
         </div>
       ))}

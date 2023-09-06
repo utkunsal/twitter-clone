@@ -12,9 +12,9 @@ const tweetSchema = new mongoose.Schema({
     required: true,
   },
 
-  community: {
+  repost: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Community"
+    ref: "Tweet"
   },
 
   createdAt: {

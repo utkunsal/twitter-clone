@@ -6,7 +6,7 @@ import Link from "next/link"
  
 export default async function Home() {
   const user = await currentUser()
-  const response = await getTweets(1, 30, user?.id ?? "");
+  const response = await getTweets(1, 30);
 
   return (
     <>
@@ -23,11 +23,12 @@ export default async function Home() {
                 content={tweet.text}
                 image={tweet.image}
                 author={tweet.author}
-                comunity={tweet.community}
                 createdAt={tweet.createdAt}
                 replies={tweet.children} 
                 hideTotalReplyCount
                 hideLine={!tweet.children.length}
+                repost={tweet.repost}
+                likeCount={tweet.likeCount ?? 0}
               />
               {tweet.children.slice(0, 1).map((childTweet: any, index: number) => (
                 <div key={childTweet._id} className="-mt-[3.25rem] pb-3 bg-dark-2">
@@ -38,12 +39,12 @@ export default async function Home() {
                     content={childTweet.text}
                     image={childTweet.image}
                     author={childTweet.author}
-                    comunity={childTweet.community}
                     createdAt={childTweet.createdAt}
                     replies={childTweet.children} 
                     isReply
                     hideTotalReplyCount
                     hideLine={childTweet.children.length === 0}
+                    likeCount={childTweet.likeCount ?? 0}
                   />
                    {childTweet.children.slice(0, 1).map((childOfChildTweet: any, index: number) => (
                     <TweetCard 
@@ -53,13 +54,13 @@ export default async function Home() {
                       content={childOfChildTweet.text}
                       image={childOfChildTweet.image}
                       author={childOfChildTweet.author}
-                      comunity={childOfChildTweet.community}
                       createdAt={childOfChildTweet.createdAt}
                       replies={childOfChildTweet.children} 
                       isReply
                       hideTotalReplyCount
                       hideLine
                       className="-mb-0.5 bg-dark-2"
+                      likeCount={childOfChildTweet.likeCount ?? 0}
                     />
                 ))}
                 </div>

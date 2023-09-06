@@ -67,7 +67,7 @@ export const getUserTweets = async ( userId: string ) => {
       .populate({
         path: "tweets",
         model: Tweet,
-        select: "_id text image author parent children createdAt likeCount",
+        select: "_id text image author parent repost children createdAt likeCount",
         options: {
           sort: { createdAt: "desc" }
         },
@@ -77,15 +77,20 @@ export const getUserTweets = async ( userId: string ) => {
           },
         },
         populate: [
-          /* {
-            path: "community",
-            model: Community,
-            select: "image name id _id", 
-          }, */
           {
             path: "children",
             model: Tweet,
             select: "_id text image author parent children createdAt likeCount",
+            populate: {
+              path: "author",
+              model: User,
+              select: "name username image id", 
+            },
+          },
+          {
+            path: "repost",
+            model: Tweet,
+            select: "_id text image author parent createdAt likeCount",
             populate: {
               path: "author",
               model: User,
@@ -128,12 +133,24 @@ export const getUserReplies = async ( userId: string ) => {
         populate: {
           path: "parent",
           model: Tweet,
-          select: "_id text image author parent children createdAt likeCount",
-          populate: {
-            path: "author",
-            model: User,
-            select: "name username image id", 
-          },
+          select: "_id text image author parent repost children createdAt likeCount",
+          populate: [
+            {
+              path: "author",
+              model: User,
+              select: "name username image id", 
+            },
+            {
+              path: "repost",
+              model: Tweet,
+              select: "_id text image author parent createdAt likeCount",
+              populate: {
+                path: "author",
+                model: User,
+                select: "name username image id", 
+              },
+            }
+          ]
         }
       })
 
@@ -155,7 +172,8 @@ export const getUserLikes = async ( userId: string ) => {
     await connectToDb()
     const { _id } = await User.findOne({ id: userId }, "_id")
 
-    const likes = await Tweet.find({ likes: _id }, "_id text image author parent createdAt likeCount")
+    const likes = await Tweet.find({ likes: _id }, "_id text image author parent repost children createdAt likeCount")
+      .sort({ createdAt: "desc" })
       .populate("author")
       .populate({ 
         path: "parent", 
@@ -164,6 +182,16 @@ export const getUserLikes = async ( userId: string ) => {
             model: User,
             select: "id name username image",
           }
+      })
+      .populate({ 
+        path: "repost", 
+        model: Tweet,
+        select: "_id text image author parent createdAt likeCount",
+        populate:  {
+          path: "author",
+          model: User,
+          select: "id name username image",
+        },
       })
 
     return likes;
@@ -252,5 +280,83 @@ export const getUserActivity = async ( userId: string ) => {
 
   } catch (err: any) {
     throw new Error(`Failed to get user activity: ${err.message}`);
+  }
+}
+
+
+export const followUser = async ({ targetUserObjectId, currentUserId, path }: { targetUserObjectId: string, currentUserId: string, path: string }) => {
+  try {
+    await connectToDb()
+    const { _id } = await User.findOne({ id: currentUserId }, "_id")
+
+    await Promise.all([
+        User.updateOne({ 
+        "_id": _id, 
+        "following": { "$ne": targetUserObjectId }
+      },
+      {
+        "$push": { "following": targetUserObjectId }
+      }),
+      User.updateOne({ 
+        "_id": targetUserObjectId, 
+        "followers": { "$ne": _id }
+      },
+      {
+        "$push": { "followers": _id }
+      })
+    ])
+    
+    revalidatePath(path)
+
+  } catch (err: any) {
+    throw new Error(`Failed to follow user: ${err.message}`);
+  }
+}
+
+
+export const unfollowUser = async ({ targetUserObjectId, currentUserId, path }: { targetUserObjectId: string, currentUserId: string, path: string }) => {
+  try {
+    await connectToDb()
+    const { _id } = await User.findOne({ id: currentUserId }, "_id")
+  
+    await Promise.all([
+        User.updateOne({ 
+        "_id": _id, 
+        "following": targetUserObjectId
+      },
+      {
+        "$pull": { "following": targetUserObjectId }
+      }),
+      User.updateOne({ 
+        "_id": targetUserObjectId, 
+        "followers": _id
+      },
+      {
+        "$pull": { "followers": _id }
+      })
+    ])
+    
+    revalidatePath(path)
+
+  } catch (err: any) {
+    throw new Error(`Failed to unfollow user: ${err.message}`);
+  }
+}
+
+
+export const isFollowing = async ({ targetUserObjectId, currentUserId }: { targetUserObjectId: string, currentUserId: string }) => {
+  try {
+    await connectToDb()
+    if(!currentUserId) return
+
+    const result = await User.findOne({ 
+      "id": currentUserId,
+      "following": targetUserObjectId,
+    })
+
+    return result?.followers ? true : false
+
+  } catch (err: any) {
+    throw new Error(`Failed to get isFollowing: ${err.message}`);
   }
 }
