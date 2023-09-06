@@ -24,6 +24,23 @@ export const getUser = async (userId: string) => {
   }
 }
 
+
+export const getRandomUsers = async (userId: string) => {
+  try {
+    await connectToDb()
+    const users =  await User.aggregate([ 
+      { $match : { id: { $ne: userId } } },
+      { $sample: { size: 5 } },
+      { $project : { _id: 0, id: 1, image: 1, username: 1, name: 1 } }
+    ])
+    return users;
+  } catch (err: any) {
+    console.error(`Failed to get random users: ${err.message}`)
+    return [];
+  }
+}
+
+
 export const updateUser = async ({
   userId,
   username,

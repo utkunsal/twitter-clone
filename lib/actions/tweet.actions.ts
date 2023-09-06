@@ -27,6 +27,9 @@ export const createTweet = async ({
 }: Params): Promise<void> => {
   try {
     await connectToDb()
+
+    if (author.startsWith("user"))
+      author = (await User.findOne({ id: author }))._id;
     
     const createdTweet = await Tweet.create(!repostId ? {
       text,

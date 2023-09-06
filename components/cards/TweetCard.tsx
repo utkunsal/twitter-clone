@@ -34,6 +34,7 @@ interface Props {
       image: string,
     },
     createdAt: string,
+    likeCount: number,
   }
   isReply?: boolean,
   hideTotalReplyCount?: boolean,
@@ -90,8 +91,15 @@ export async function TweetCard ({
               {!isRepost && <span className="text-small-regular text-light-1 opacity-50">{formatDateString(createdAt)}</span>}
             </div>
             <Link href={`/tweet/${id}`} className="cursor-pointer">
-              <p className={`${isRepost ? "mt-1" : "mt-2"} text-small-regular text-light-2`}>
-                {content}
+              <p className={`${content === "r" && "text-neutral-400 italic flex-row flex gap-1"} ${isRepost ? "mt-1" : "mt-2"} text-small-regular text-light-2`}>
+                {content === "r" && <Image
+                  src="/assets/repost.svg"
+                  alt="reply"
+                  width={20}
+                  height={20}
+                  className="opacity-50 cursor-pointer object-contain" 
+                />}
+                {content === "r" ? "Retweeted" : content}
               </p>
 
               {image && <Image 
@@ -130,6 +138,7 @@ export async function TweetCard ({
                   liked={isLikedByCurrentUser ?? false}
                   replyCount={!hideTotalReplyCount && !isReply && replies.length !== 0 ? null : replies.length}
                   likeCount={likeCount}
+                  disableRepost={content === "r"}
                 />
              {/*  {currentUserId === author.id && 
                   <ClientButton

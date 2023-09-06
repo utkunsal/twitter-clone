@@ -1,12 +1,13 @@
 import { TweetCard } from "@/components/cards/TweetCard";
+import Pagination from "@/components/shared/Pagination";
 import { getTweets } from "@/lib/actions/tweet.actions";
 import { currentUser } from "@clerk/nextjs";
 import Image from "next/image"
 import Link from "next/link"
  
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
   const user = await currentUser()
-  const response = await getTweets(1, 30);
+  const response = await getTweets(searchParams.page ? +searchParams.page : 1, 25);
 
   return (
     <>
@@ -92,6 +93,11 @@ export default async function Home() {
           <p className="no-result">No tweets</p>
         }
       </section>
+      <Pagination
+        path='/'
+        pageNumber={searchParams?.page ? +searchParams.page : 1}
+        hasNext={response.hasNext}
+      />
     </>
   )
 }
