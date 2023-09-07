@@ -109,7 +109,7 @@ export const getTweets = async ( pageNumber=1, pageSize=15 ) => {
     const offset = (pageNumber - 1) * pageSize
 
     const query = Tweet
-                    .find({ parent: { $in: [null, undefined] } }, "_id text image author parent children createdAt likeCount repost")
+                    .find({ parent: { $in: [null, undefined] }, text: { $ne: "d" } }, "_id text image author parent children createdAt likeCount repost")
                     .sort({ createdAt: "desc" })
                     .skip(offset)
                     .limit(pageSize)
@@ -380,6 +380,58 @@ export const isLiked = async ({ tweetId, currentUserId }: { tweetId: string, cur
     })
 
     return result?.likes ? true : false
+
+  } catch (err: any) {
+    throw new Error(`Failed to get isLiked: ${err.message}`);
+  }
+}
+
+
+/**
+ * Deletes given tweet if it has no relations, removes its content if it has relations
+ */
+export const deleteTweet = async ({ tweetId, currentUserId, path }: { tweetId: string, currentUserId: string, path: string }) => {
+  try {
+    await connectToDb()
+    if(!currentUserId) return
+    
+    const { _id } = await User.findOne({ id: currentUserId }, "_id")
+
+    const [tweet, repostedTweet] = await Promise.all([ 
+      Tweet.findOne({ 
+        "_id": tweetId,
+        "author": _id,
+      }),
+      Tweet.findOne({
+        "repost": tweetId,
+      })
+    ])
+
+    if (!tweet.children?.length && !repostedTweet){
+
+      if (tweet.parent){
+        await Tweet.updateOne({ 
+          "_id": tweet.parent, 
+          "children": tweetId
+        },
+        {
+          "$pull": { "children": tweetId }
+        });
+      }
+
+      await Tweet.deleteOne({ _id: tweetId });
+
+    } else {
+      await Tweet.findOneAndUpdate({ _id: tweetId }, 
+        {
+          text: "d",
+          image: null,
+          repost: null,
+        },
+      );
+    }
+
+    revalidatePath(path)
 
   } catch (err: any) {
     throw new Error(`Failed to get isLiked: ${err.message}`);

@@ -92,6 +92,7 @@ export const getUserTweets = async ( userId: string ) => {
           parent: {
             $in: [null, undefined]
           },
+          text: { $ne: "d" }
         },
         populate: [
           {
@@ -146,6 +147,7 @@ export const getUserReplies = async ( userId: string ) => {
           parent: {
             $nin: [null, undefined]
           },
+          text: { $ne: "d" }
         },
         populate: {
           path: "parent",
@@ -189,7 +191,7 @@ export const getUserLikes = async ( userId: string ) => {
     await connectToDb()
     const { _id } = await User.findOne({ id: userId }, "_id")
 
-    const likes = await Tweet.find({ likes: _id }, "_id text image author parent repost children createdAt likeCount")
+    const likes = await Tweet.find({ likes: _id, text: { $ne: "d" } }, "_id text image author parent repost children createdAt likeCount")
       .sort({ createdAt: "desc" })
       .populate("author")
       .populate({ 

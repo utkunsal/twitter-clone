@@ -91,7 +91,7 @@ export async function TweetCard ({
               {!isRepost && <span className="text-small-regular text-light-1 opacity-50">{formatDateString(createdAt)}</span>}
             </div>
             <Link href={`/tweet/${id}`} className="cursor-pointer">
-              <p className={`${content === "r" && "text-neutral-400 italic flex-row flex gap-1"} ${isRepost ? "mt-1" : "mt-2"} text-small-regular text-light-2`}>
+              <p className={`${(content === "r"  || content === "d") && "text-neutral-400 italic flex-row flex gap-1"} ${isRepost ? "mt-1" : "mt-2"} text-small-regular text-light-2`}>
                 {content === "r" && <Image
                   src="/assets/repost.svg"
                   alt="reply"
@@ -99,7 +99,7 @@ export async function TweetCard ({
                   height={20}
                   className="opacity-50 cursor-pointer object-contain" 
                 />}
-                {content === "r" ? "Retweeted" : content}
+                {content === "r" ? "Retweeted" : (content === "d" ? "Deleted" : content)}
               </p>
 
               {image && <Image 
@@ -130,7 +130,7 @@ export async function TweetCard ({
               />
             }
 
-            {!hideButtons && 
+            {!hideButtons && content !== "d" && 
               <div className="flex flex-row items-center justify-between">
                 <TweetButtons 
                   tweetId={JSON.stringify(id)} 
@@ -140,13 +140,13 @@ export async function TweetCard ({
                   likeCount={likeCount}
                   disableRepost={content === "r"}
                 />
-             {/*  {currentUserId === author.id && 
+                {currentUserId === author.id && 
                   <ClientButton
                     type="delete"
                     currentUserId={currentUserId}
                     tweetId={JSON.stringify(id)}
                   />
-                } */}
+                }
               </div>
             }
           </div>
