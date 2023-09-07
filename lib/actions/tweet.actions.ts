@@ -153,7 +153,7 @@ export const getTweets = async ( pageNumber=1, pageSize=15 ) => {
   
   const tweets = await query.exec();
 
-  const totalTweetCount = await Tweet.countDocuments({ parent: { $in: [null, undefined] } });
+  const totalTweetCount = await Tweet.countDocuments({ parent: { $in: [null, undefined] }, text: { $ne: "d" } });
   const hasNext = totalTweetCount > offset + tweets.length;
 
   return { tweets, hasNext }
@@ -434,6 +434,6 @@ export const deleteTweet = async ({ tweetId, currentUserId, path }: { tweetId: s
     revalidatePath(path)
 
   } catch (err: any) {
-    throw new Error(`Failed to get isLiked: ${err.message}`);
+    throw new Error(`Failed to delete tweet: ${err.message}`);
   }
 }
