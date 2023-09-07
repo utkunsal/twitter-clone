@@ -28,6 +28,7 @@ export default async function Page({ params }: { params: { id: string } }) {
   if(parent)
     parent.parent = parent.parent ? await getAllParentTweets(parent._id) : null
 
+
   const renderParentTweets = (data: any): React.ReactNode => {
     if (data.parent) {
       return (
@@ -41,7 +42,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             image={data.parent.image}
             author={data.parent.author}
             createdAt={data.parent.createdAt}
-            replies={[]} 
+            replies={data.parent.children} 
             className="-mt-5 -mb-7"
             likeCount={data.parent.likeCount ?? 0}
           />
@@ -64,9 +65,10 @@ export default async function Page({ params }: { params: { id: string } }) {
             image={parent.image}
             author={parent.author}
             createdAt={parent.createdAt}
-            replies={[]} 
+            replies={parent.children} 
             repost={parent.repost}
             className="-mt-5"
+            hideTotalReplyCount
             likeCount={parent.likeCount ?? 0}
             />
           </>

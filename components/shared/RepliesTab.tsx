@@ -23,7 +23,7 @@ export default async function TweetsTab({ currentUserId, accountId }: Props){
               image={tweet.parent.image}
               author={tweet.parent.author}
               createdAt={tweet.parent.createdAt}
-              replies={[]} 
+              replies={tweet.parent.children} 
               isReply
               className="-mb-1"
               repost={tweet.parent.repost}
